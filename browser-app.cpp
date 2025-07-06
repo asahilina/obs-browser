@@ -124,16 +124,32 @@ void BrowserApp::OnBeforeCommandLineProcessing(const CefString &, CefRefPtr<CefC
 		disableFeatures += ",EnableWindowsGamingInputDataFetcher";
 #endif
 		disableFeatures += ",WebBluetooth";
+		disableFeatures += ",MediaRouter";
+		disableFeatures += ",CalculateNativeWinOcclusion";
+		disableFeatures += ",LiveCaption";
 		command_line->AppendSwitchWithValue("disable-features", disableFeatures);
 	} else {
 		command_line->AppendSwitchWithValue("disable-features", "WebBluetooth,"
 #ifdef _WIN32
 									"EnableWindowsGamingInputDataFetcher,"
 #endif
+									"MediaRouter,"
+									"CalculateNativeWinOcclusion,"
+									"LiveCaption,"
 									"HardwareMediaKeyHandling");
 	}
 
+	if (command_line->HasSwitch("disable-blink-features")) {
+		std::string disableBlinkFeatures = command_line->GetSwitchValue("disable-blink-features");
+		disableBlinkFeatures += ",DocumentPictureInPictureAPI";
+		command_line->AppendSwitchWithValue("disable-blink-features", disableBlinkFeatures);
+	} else {
+		command_line->AppendSwitchWithValue("disable-blink-features", "DocumentPictureInPictureAPI");
+	}
+
 	command_line->AppendSwitchWithValue("autoplay-policy", "no-user-gesture-required");
+	command_line->AppendSwitch("disable-extensions");
+	command_line->AppendSwitch("hide-crash-restore-bubble");
 #ifdef __APPLE__
 	command_line->AppendSwitch("use-mock-keychain");
 #elif !defined(_WIN32)
