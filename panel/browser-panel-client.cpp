@@ -104,7 +104,7 @@ bool QCefBrowserClient::OnChromeCommand(CefRefPtr<CefBrowser>, int, cef_window_o
 /* CefDisplayHandler */
 void QCefBrowserClient::OnTitleChange(CefRefPtr<CefBrowser> browser, const CefString &title)
 {
-	if (widget && widget->cefBrowser->IsSame(browser)) {
+	if (widget && widget->cefBrowser && widget->cefBrowser->IsSame(browser)) {
 		std::string str_title = title;
 		QString qt_title = QString::fromUtf8(str_title.c_str());
 		QMetaObject::invokeMethod(widget, "titleChanged", Q_ARG(QString, qt_title));

@@ -287,7 +287,7 @@ static void BrowserInit(void)
 	os_mkdir(conf_path);
 
 	CefSettings settings;
-	settings.log_severity = LOGSEVERITY_FATAL;
+	settings.log_severity = LOGSEVERITY_WARNING;
 	BPtr<char> log_path = obs_module_config_path("debug.log");
 	BPtr<char> log_path_abs = os_get_abs_path_ptr(log_path);
 	CefString(&settings.log_file) = log_path_abs;
