@@ -78,14 +78,10 @@ CefRefPtr<CefRequestHandler> BrowserClient::GetRequestHandler()
 
 CefRefPtr<CefResourceRequestHandler> BrowserClient::GetResourceRequestHandler(CefRefPtr<CefBrowser>,
 									      CefRefPtr<CefFrame>,
-									      CefRefPtr<CefRequest> request, bool, bool,
+									      CefRefPtr<CefRequest>, bool, bool,
 									      const CefString &, bool &)
 {
-	if (request->GetHeaderByName("origin") == "null") {
-		return this;
-	}
-
-	return nullptr;
+	return this;
 }
 
 void BrowserClient::OnRenderProcessTerminated(CefRefPtr<CefBrowser>, TerminationStatus
@@ -114,9 +110,12 @@ void BrowserClient::OnRenderProcessTerminated(CefRefPtr<CefBrowser>, Termination
 }
 
 CefResourceRequestHandler::ReturnValue BrowserClient::OnBeforeResourceLoad(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>,
-									   CefRefPtr<CefRequest>,
+									   CefRefPtr<CefRequest> request,
 									   CefRefPtr<CefCallback>)
 {
+	if (BlockChromeUrl(request->GetURL()))
+		return RV_CANCEL;
+
 	return RV_CONTINUE;
 }
 
@@ -624,6 +623,12 @@ void BrowserClient::OnLoadEnd(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame> frame, 
 
 		frame->ExecuteJavaScript(script, "", 0);
 	}
+}
+
+void BrowserClient::OnLoadError(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame> frame, CefLoadHandler::ErrorCode,
+				const CefString &, const CefString &)
+{
+	frame->LoadURL("about:blank");
 }
 
 bool BrowserClient::OnConsoleMessage(CefRefPtr<CefBrowser>, cef_log_severity_t level, const CefString &message,

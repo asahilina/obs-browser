@@ -38,6 +38,13 @@ CefRefPtr<CefDisplayHandler> QCefBrowserClient::GetDisplayHandler()
 	return this;
 }
 
+#if CHROME_VERSION_BUILD >= 6533
+CefRefPtr<CefCommandHandler> QCefBrowserClient::GetCommandHandler()
+{
+	return this;
+}
+#endif
+
 CefRefPtr<CefRequestHandler> QCefBrowserClient::GetRequestHandler()
 {
 	return this;
@@ -66,6 +73,32 @@ CefRefPtr<CefKeyboardHandler> QCefBrowserClient::GetKeyboardHandler()
 CefRefPtr<CefJSDialogHandler> QCefBrowserClient::GetJSDialogHandler()
 {
 	return this;
+}
+
+CefRefPtr<CefResourceRequestHandler> QCefBrowserClient::GetResourceRequestHandler(CefRefPtr<CefBrowser>,
+										  CefRefPtr<CefFrame>,
+										  CefRefPtr<CefRequest>, bool, bool,
+										  const CefString &, bool &)
+{
+	return this;
+}
+
+/* CefResourceRequestHandler */
+CefResourceRequestHandler::ReturnValue QCefBrowserClient::OnBeforeResourceLoad(CefRefPtr<CefBrowser>,
+									       CefRefPtr<CefFrame>,
+									       CefRefPtr<CefRequest> request,
+									       CefRefPtr<CefCallback>)
+{
+	if (BlockChromeUrl(request->GetURL()))
+		return RV_CANCEL;
+
+	return RV_CONTINUE;
+}
+
+/* CefCommandHandler */
+bool QCefBrowserClient::OnChromeCommand(CefRefPtr<CefBrowser>, int, cef_window_open_disposition_t)
+{
+	return true;
 }
 
 /* CefDisplayHandler */

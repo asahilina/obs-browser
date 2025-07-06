@@ -60,3 +60,20 @@
 #else
 #pragma GCC diagnostic pop
 #endif
+
+static bool BlockChromeUrl(std::string url)
+{
+	CefURLParts parts;
+	bool parsed = CefParseURL(url, parts);
+
+	if (parsed && CefString(&parts.scheme).compare("chrome") == 0) {
+		std::string blocked[3] = {"extensions", "password-manager",
+					  "settings"};
+		std::string host = CefString(&parts.host);
+		if (std::find(std::begin(blocked), std::end(blocked), host) !=
+		    std::end(blocked)) {
+			return true;
+		}
+	}
+	return false;
+}

@@ -7,11 +7,15 @@
 
 class QCefBrowserClient : public CefClient,
 			  public CefDisplayHandler,
+#if CHROME_VERSION_BUILD >= 6533
+			  public CefCommandHandler,
+#endif
 			  public CefRequestHandler,
 			  public CefLifeSpanHandler,
 			  public CefContextMenuHandler,
 			  public CefLoadHandler,
 			  public CefKeyboardHandler,
+			  public CefResourceRequestHandler,
 			  public CefFocusHandler,
 			  public CefJSDialogHandler {
 
@@ -26,12 +30,19 @@ public:
 	/* CefClient */
 	virtual CefRefPtr<CefLoadHandler> GetLoadHandler() override;
 	virtual CefRefPtr<CefDisplayHandler> GetDisplayHandler() override;
+#if CHROME_VERSION_BUILD >= 6533
+	virtual CefRefPtr<CefCommandHandler> GetCommandHandler() override;
+#endif
 	virtual CefRefPtr<CefRequestHandler> GetRequestHandler() override;
 	virtual CefRefPtr<CefLifeSpanHandler> GetLifeSpanHandler() override;
 	virtual CefRefPtr<CefKeyboardHandler> GetKeyboardHandler() override;
 	virtual CefRefPtr<CefFocusHandler> GetFocusHandler() override;
 	virtual CefRefPtr<CefContextMenuHandler> GetContextMenuHandler() override;
 	virtual CefRefPtr<CefJSDialogHandler> GetJSDialogHandler() override;
+
+	/* CefCommandHandler */
+	virtual bool OnChromeCommand(CefRefPtr<CefBrowser> browser, int command_id,
+				     cef_window_open_disposition_t disposition) override;
 
 	/* CefDisplayHandler */
 	virtual void OnTitleChange(CefRefPtr<CefBrowser> browser, const CefString &title) override;
@@ -64,6 +75,18 @@ public:
 
 	/* CefFocusHandler */
 	virtual bool OnSetFocus(CefRefPtr<CefBrowser> browser, CefFocusHandler::FocusSource source) override;
+
+	/* CefRequestHandler */
+	virtual CefRefPtr<CefResourceRequestHandler>
+	GetResourceRequestHandler(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame,
+				  CefRefPtr<CefRequest> request, bool is_navigation, bool is_download,
+				  const CefString &request_initiator, bool &disable_default_handling) override;
+
+	/* CefResourceRequestHandler */
+	virtual CefResourceRequestHandler::ReturnValue OnBeforeResourceLoad(CefRefPtr<CefBrowser> browser,
+									    CefRefPtr<CefFrame> frame,
+									    CefRefPtr<CefRequest> request,
+									    CefRefPtr<CefCallback> callback) override;
 
 	/* CefContextMenuHandler */
 	virtual void OnBeforeContextMenu(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame,
