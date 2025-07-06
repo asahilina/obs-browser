@@ -293,6 +293,9 @@ static void BrowserInit(void)
 	CefString(&settings.log_file) = log_path_abs;
 	settings.windowless_rendering_enabled = true;
 	settings.no_sandbox = true;
+#if CHROME_VERSION_BUILD >= 6533 && CHROME_VERSION_BUILD < 7103
+	settings.chrome_runtime = true;
+#endif
 
 	uint32_t obs_ver = obs_get_version();
 	uint32_t obs_maj = obs_ver >> 24;
@@ -341,6 +344,7 @@ static void BrowserInit(void)
 	settings.persist_user_preferences = 1;
 #endif
 	CefString(&settings.cache_path) = conf_path_abs;
+	CefString(&settings.root_cache_path) = conf_path_abs;
 #if !defined(__APPLE__) || defined(ENABLE_BROWSER_LEGACY)
 	char *abs_path = os_get_abs_path_ptr(path.c_str());
 	CefString(&settings.browser_subprocess_path) = abs_path;

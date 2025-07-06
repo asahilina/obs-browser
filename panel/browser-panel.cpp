@@ -552,8 +552,16 @@ QCefWidget *QCefInternal::create_widget(QWidget *parent, const std::string &url,
 
 QCefCookieManager *QCefInternal::create_cookie_manager(const std::string &storage_path, bool persist_session_cookies)
 {
+	auto storage_path_ = storage_path;
+#if CHROME_VERSION_BUILD > 6533
+	std::string legacy = "obs_profile_cookies/";
+	size_t pos = storage_path_.find(legacy);
+	if (pos != std::string::npos) {
+		storage_path_.replace(pos, legacy.length(), "obs_profile_cookies_");
+	}
+#endif
 	try {
-		return new QCefCookieManagerInternal(storage_path, persist_session_cookies);
+		return new QCefCookieManagerInternal(storage_path_, persist_session_cookies);
 	} catch (const char *error) {
 		blog(LOG_ERROR, "Failed to create cookie manager: %s", error);
 		return nullptr;
@@ -562,7 +570,15 @@ QCefCookieManager *QCefInternal::create_cookie_manager(const std::string &storag
 
 BPtr<char> QCefInternal::get_cookie_path(const std::string &storage_path)
 {
-	BPtr<char> rpath = obs_module_config_path(storage_path.c_str());
+	auto storage_path_ = storage_path;
+#if CHROME_VERSION_BUILD > 6533
+	std::string legacy = "obs_profile_cookies/";
+	size_t pos = storage_path_.find(legacy);
+	if (pos != std::string::npos) {
+		storage_path_.replace(pos, legacy.length(), "obs_profile_cookies_");
+	}
+#endif
+	BPtr<char> rpath = obs_module_config_path(storage_path_.c_str());
 	return os_get_abs_path_ptr(rpath.Get());
 }
 
