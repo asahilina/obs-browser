@@ -48,9 +48,51 @@ CefRefPtr<CefBrowserProcessHandler> BrowserApp::GetBrowserProcessHandler()
 	return this;
 }
 
+CefRefPtr<CefClient> BrowserApp::GetDefaultClient()
+{
+	return GetDummy();
+}
+
 void BrowserApp::OnRegisterCustomSchemes(CefRawPtr<CefSchemeRegistrar> registrar)
 {
 	registrar->AddCustomScheme("http", CEF_SCHEME_OPTION_STANDARD | CEF_SCHEME_OPTION_CORS_ENABLED);
+}
+
+void BrowserApp::OnContextInitialized()
+{
+	dummy = new BrowserDummyClient();
+
+	CefRefPtr<CefRequestContext> rc = CefRequestContext::GetGlobalContext();
+	CefString err;
+	CefRefPtr<CefValue> off = CefValue::Create();
+	off->SetBool(false);
+	std::string opts[20] = {"autofill.credit_card_enabled",
+				"autofill.enabled",
+				"autofill.iban_enabled",
+				"autofill.payment_card_benefits",
+				"autofill.payment_cvc_storage",
+				"autofill.profile_enabled",
+				"autologin.enabled",
+				"browser_labs_enabled",
+				"credentials_enable_autosignin",
+				"credentials_enable_service",
+				"payments.can_make_payment_enabled",
+				"printing.enabled",
+				"search.suggest_enabled",
+				"shopping_list_enabled",
+				"side_panel.google_search_side_panel_enabled",
+				"side_search.enabled",
+				"signin.allowed",
+				"signin.allowed_on_next_startup",
+				"translate",
+				"url_keyed_anonymized_data_collection.enabled"};
+
+	for (std::string opt : opts) {
+		rc->SetPreference(opt, off.get(), err);
+	}
+	off->SetBool(true);
+	rc->SetPreference("extensions.block_external_extensions", off.get(), err);
+	rc->SetPreference("extensions.disabled", off.get(), err);
 }
 
 void BrowserApp::OnBeforeChildProcessLaunch(CefRefPtr<CefCommandLine> command_line)
